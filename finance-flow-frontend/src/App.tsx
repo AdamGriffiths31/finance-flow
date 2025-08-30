@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { Layout } from '@/components/layout/Layout';
 import { Dashboard } from '@/pages/Dashboard';
 import { checkHealth } from '@/services/api';
@@ -24,6 +25,17 @@ function App() {
         )}
         <Dashboard />
       </div>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#374151',
+            color: '#fff',
+            borderRadius: '8px',
+          },
+        }}
+      />
     </Layout>
   );
 }
