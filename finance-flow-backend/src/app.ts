@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import { requestLogger } from "./middleware/logger";
 import healthRoutes from "./routes/health";
 import sankeyRoutes from "./routes/sankey";
+import financesRoutes from "./routes/finances";
 
 export const createApp = (): Application => {
   const app = express();
@@ -28,6 +29,7 @@ export const createApp = (): Application => {
 
   app.use(`${config.apiPrefix}/health`, healthRoutes);
   app.use(`${config.apiPrefix}/sankey`, sankeyRoutes);
+  app.use(`${config.apiPrefix}/finances`, financesRoutes);
 
   app.use(errorHandler);
 
