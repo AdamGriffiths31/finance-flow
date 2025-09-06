@@ -55,7 +55,7 @@ export const AddLinkModal: React.FC<AddLinkModalProps> = ({ sourceNodeId, data, 
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Flow Amount ($)
+              Flow Amount (£)
             </label>
             <input
               type="number"

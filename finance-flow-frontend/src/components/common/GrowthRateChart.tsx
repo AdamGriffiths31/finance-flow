@@ -100,7 +100,7 @@ export const GrowthRateChart: React.FC<GrowthRateChartProps> = ({
     g.append('g')
       .attr('transform', `translate(0, ${innerHeight})`)
       .call(d3.axisBottom(xScale)
-        .tickFormat(d3.timeFormat('%b %y'))
+        .tickFormat((d) => d3.timeFormat('%b %y')(d as Date))
         .ticks(6)
       )
       .selectAll('text')

@@ -45,3 +45,34 @@ export interface FinancesData {
   history: FinanceHistoryPoint[];
   lastUpdated: string;
 }
+
+export interface GrowthRate {
+  category: string;
+  monthlyRate: number;
+  annualRate: number;
+}
+
+export interface ProjectionDataPoint {
+  date: Date;
+  value: number;
+  isProjected: boolean;
+}
+
+export interface ProjectionSeries {
+  name: string;
+  color: string;
+  data: ProjectionDataPoint[];
+  growthRate: number;
+}
+
+export interface ProjectionConfig {
+  calculationPeriodMonths: number;
+  projectionPeriodMonths: number;
+}
+
+export interface ProjectionData {
+  series: ProjectionSeries[];
+  growthRates: GrowthRate[];
+  config: ProjectionConfig;
+  generatedAt: string;
+}

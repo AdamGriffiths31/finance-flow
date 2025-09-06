@@ -49,6 +49,10 @@ export const MonthlyIncreasePanel: React.FC<MonthlyIncreasePanelProps> = ({
     return `${value >= 0 ? '+' : '-'}£${absValue.toFixed(0)}`;
   };
 
+  // Calculate additional metrics
+  const totalGrowth = recentChanges.reduce((sum, change) => sum + change.increase, 0);
+  const averageGrowth = totalGrowth / recentChanges.length;
+
   return (
     <div className={className}>
       <div className="space-y-4">
@@ -67,6 +71,19 @@ export const MonthlyIncreasePanel: React.FC<MonthlyIncreasePanelProps> = ({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Summary Statistics */}
+      <div className="mt-6 pt-4 border-t border-gray-600">
+        {/* Average Growth */}
+        <div className="text-center">
+          <div className="text-xs text-gray-400 mb-1">3-Month Average</div>
+          <div className={`text-lg font-semibold ${
+            averageGrowth >= 0 ? 'text-green-400' : 'text-red-400'
+          }`}>
+            {formatCurrency(averageGrowth)}
+          </div>
+        </div>
       </div>
     </div>
   );

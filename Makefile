@@ -1,23 +1,41 @@
-.PHONY: dev install build lint clean stop help
+.PHONY: dev dev-test dev-prod install build lint clean stop help
 
 # Default target
 help:
 	@echo "Available commands:"
-	@echo "  make dev       - Start both backend and frontend in development mode"
+	@echo "  make dev       - Start both backend and frontend in development mode (test data)"
+	@echo "  make dev-test  - Start both backend and frontend with test data"
+	@echo "  make dev-prod  - Start both backend and frontend with production data"
 	@echo "  make install   - Install dependencies for both projects"
 	@echo "  make build     - Build both projects"
 	@echo "  make lint      - Run linting for both projects"
 	@echo "  make clean     - Clean node_modules and build artifacts"
 	@echo "  make stop      - Stop all running servers"
 
-# Start both servers in development mode
+# Start both servers in development mode (defaults to test data)
 dev:
-	@echo "Starting backend and frontend..."
-	@make -j2 dev-backend dev-frontend
+	@echo "Starting backend and frontend with test data..."
+	@make -j2 dev-backend-test dev-frontend
 
-# Start individual servers (used by dev target)
+# Start both servers with test data
+dev-test:
+	@echo "Starting backend and frontend with test data..."
+	@make -j2 dev-backend-test dev-frontend
+
+# Start both servers with production data
+dev-prod:
+	@echo "Starting backend and frontend with production data..."
+	@make -j2 dev-backend-prod dev-frontend
+
+# Start individual backend servers (used by dev targets)
 dev-backend:
-	@cd finance-flow-backend && npm run dev
+	@cd finance-flow-backend && npm run dev:test
+
+dev-backend-test:
+	@cd finance-flow-backend && npm run dev:test
+
+dev-backend-prod:
+	@cd finance-flow-backend && npm run dev:prod
 
 dev-frontend:
 	@cd finance-flow-frontend && npm run dev

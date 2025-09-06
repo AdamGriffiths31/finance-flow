@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { SankeyData } from '@/types/sankey';
-import type { FinancesBreakdownData, FinancesHistoryData, FinancesData } from '@/types/finances';
+import type { FinancesBreakdownData, FinancesHistoryData, FinancesData, ProjectionData, ProjectionConfig } from '@/types/finances';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
 
@@ -91,4 +91,27 @@ export const saveFinancesData = async (data: FinancesData): Promise<FinancesData
   const response = await api.put('/finances/data', data);
   // Handle different response structures safely
   return response.data?.data || response.data;
+};
+
+// Projections data
+export const getProjectionsData = async (config?: Partial<ProjectionConfig>): Promise<ProjectionData> => {
+  const params = new URLSearchParams();
+  if (config?.calculationPeriodMonths) params.append('calculationPeriodMonths', config.calculationPeriodMonths.toString());
+  if (config?.projectionPeriodMonths) params.append('projectionPeriodMonths', config.projectionPeriodMonths.toString());
+  
+  const queryString = params.toString();
+  const url = `/projections/data${queryString ? `?${queryString}` : ''}`;
+  const response = await api.get(url);
+  
+  // Convert date strings back to Date objects
+  const data = response.data as ProjectionData;
+  data.series = data.series.map((series) => ({
+    ...series,
+    data: series.data.map((point) => ({
+      ...point,
+      date: new Date(point.date),
+    })),
+  }));
+  
+  return data;
 };

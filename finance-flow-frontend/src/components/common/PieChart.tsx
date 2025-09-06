@@ -73,7 +73,7 @@ export const PieChart: React.FC<PieChartProps> = ({
         d3.select(this)
           .transition()
           .duration(150)
-          .attr('d', hoverArc);
+          .attr('d', hoverArc(d) as string);
         
         setHoveredSlice(d.data);
         setMousePosition({ x: event.clientX, y: event.clientY });
@@ -81,11 +81,11 @@ export const PieChart: React.FC<PieChartProps> = ({
       .on('mousemove', function(event) {
         setMousePosition({ x: event.clientX, y: event.clientY });
       })
-      .on('mouseleave', function() {
+      .on('mouseleave', function(_, d) {
         d3.select(this)
           .transition()
           .duration(150)
-          .attr('d', arc);
+          .attr('d', arc(d) as string);
         
         setHoveredSlice(null);
       });

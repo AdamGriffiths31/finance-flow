@@ -7,5 +7,6 @@ dist/
 coverage/
 .vscode/
 
-# User data files
-data/
+# Production data file (contains sensitive financial information)
+data/finances-data-production.json
+data/finances-data.json

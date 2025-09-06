@@ -1,0 +1,185 @@
+{
+  "categories": [
+    {
+      "name": "Main Checking",
+      "color": "#e07a5f"
+    },
+    {
+      "name": "Emergency Fund",
+      "color": "#f2cc8f"
+    },
+    {
+      "name": "Investment Portfolio",
+      "color": "#81b29a"
+    },
+    {
+      "name": "Travel Fund",
+      "color": "#f4f1de"
+    }
+  ],
+  "history": [
+    {
+      "date": "2024-02-29",
+      "data": {
+        "Main Checking": 1166,
+        "Emergency Fund": 3509,
+        "Investment Portfolio": 9115,
+        "Travel Fund": 950
+      }
+    },
+    {
+      "date": "2024-03-31",
+      "data": {
+        "Main Checking": 1119,
+        "Emergency Fund": 3818,
+        "Investment Portfolio": 9528,
+        "Travel Fund": 1100
+      }
+    },
+    {
+      "date": "2024-04-29",
+      "data": {
+        "Main Checking": 665,
+        "Emergency Fund": 4129,
+        "Investment Portfolio": 10306,
+        "Travel Fund": 1250
+      }
+    },
+    {
+      "date": "2024-05-30",
+      "data": {
+        "Main Checking": 565,
+        "Emergency Fund": 4440,
+        "Investment Portfolio": 10523,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2024-06-29",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 4751,
+        "Investment Portfolio": 10763,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2024-07-30",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 4763,
+        "Investment Portfolio": 10641,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2024-08-30",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 5076,
+        "Investment Portfolio": 11468,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2024-09-29",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 5389,
+        "Investment Portfolio": 11487,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2024-10-31",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 5485,
+        "Investment Portfolio": 11352,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2024-11-30",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 5799,
+        "Investment Portfolio": 11865,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2024-12-31",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 6114,
+        "Investment Portfolio": 12169,
+        "Travel Fund": 1400
+      }
+    },
+    {
+      "date": "2025-02-28",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 6431,
+        "Investment Portfolio": 12526,
+        "Travel Fund": 1468
+      }
+    },
+    {
+      "date": "2025-03-30",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 6747,
+        "Investment Portfolio": 12802,
+        "Travel Fund": 1468
+      }
+    },
+    {
+      "date": "2025-03-30",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 6764,
+        "Investment Portfolio": 13092,
+        "Travel Fund": 1468
+      }
+    },
+    {
+      "date": "2025-04-29",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 6888,
+        "Investment Portfolio": 13688,
+        "Travel Fund": 1468
+      }
+    },
+    {
+      "date": "2025-05-30",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 7206,
+        "Investment Portfolio": 13999,
+        "Travel Fund": 1468
+      }
+    },
+    {
+      "date": "2025-06-29",
+      "data": {
+        "Main Checking": 500,
+        "Emergency Fund": 7525,
+        "Investment Portfolio": 14000,
+        "Travel Fund": 1468
+      }
+    },
+    {
+      "date": "2025-07-30",
+      "data": {
+        "Main Checking": 300,
+        "Emergency Fund": 7844,
+        "Investment Portfolio": 14887,
+        "Travel Fund": 1468
+      }
+    }
+  ],
+  "lastUpdated": "2025-09-06T11:48:30.222Z"
+}

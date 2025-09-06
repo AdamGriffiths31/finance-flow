@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import type { LineChartSeries, LineChartDataPoint } from '@/types/finances';
+import type { ProjectionSeries, ProjectionDataPoint } from '@/types/finances';
 
-interface LineChartProps {
-  data: LineChartSeries[];
+interface ProjectionChartProps {
+  data: ProjectionSeries[];
   width?: number;
   height?: number;
   className?: string;
@@ -11,13 +11,13 @@ interface LineChartProps {
 
 interface TooltipData {
   date: Date;
-  values: { name: string; value: number; color: string }[];
+  values: { name: string; value: number; color: string; isProjected: boolean }[];
 }
 
-export const LineChart: React.FC<LineChartProps> = ({
+export const ProjectionChart: React.FC<ProjectionChartProps> = ({
   data,
-  width = 600,
-  height = 300,
+  width = 800,
+  height = 400,
   className = '',
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -31,7 +31,7 @@ export const LineChart: React.FC<LineChartProps> = ({
     const svg = d3.select(svgElement);
     svg.selectAll('*').remove();
 
-    const margin = { top: 20, right: 80, bottom: 60, left: 80 };
+    const margin = { top: 20, right: 100, bottom: 80, left: 80 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -40,6 +40,9 @@ export const LineChart: React.FC<LineChartProps> = ({
     const allValues = data.flatMap(series => series.data.map(d => d.value));
 
     if (allDates.length === 0 || allValues.length === 0) return;
+
+    // Find the boundary between historical and projected data
+    const projectionStartDate = data[0]?.data.find(d => d.isProjected)?.date;
 
     // Create scales
     const xScale = d3
@@ -58,9 +61,32 @@ export const LineChart: React.FC<LineChartProps> = ({
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
+    // Add projection boundary line
+    if (projectionStartDate) {
+      g.append('line')
+        .attr('x1', xScale(projectionStartDate))
+        .attr('x2', xScale(projectionStartDate))
+        .attr('y1', 0)
+        .attr('y2', innerHeight)
+        .style('stroke', '#FCD34D')
+        .style('stroke-width', 2)
+        .style('stroke-dasharray', '5,5')
+        .style('opacity', 0.8);
+
+      // Add label for projection start
+      g.append('text')
+        .attr('x', xScale(projectionStartDate))
+        .attr('y', -5)
+        .attr('text-anchor', 'middle')
+        .style('fill', '#FCD34D')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .text('Projections');
+    }
+
     // Create line generator
     const line = d3
-      .line<LineChartDataPoint>()
+      .line<ProjectionDataPoint>()
       .x(d => xScale(d.date))
       .y(d => yScale(d.value))
       .curve(d3.curveMonotoneX);
@@ -70,17 +96,19 @@ export const LineChart: React.FC<LineChartProps> = ({
       .attr('transform', `translate(0, ${innerHeight})`)
       .call(d3.axisBottom(xScale)
         .tickFormat((d) => d3.timeFormat('%b %y')(d as Date))
-        .ticks(6)
+        .ticks(8)
       )
       .selectAll('text')
       .style('fill', '#9CA3AF')
-      .style('font-size', '12px');
+      .style('font-size', '12px')
+      .attr('transform', 'rotate(-45)')
+      .style('text-anchor', 'end');
 
     // Add Y axis
     g.append('g')
       .call(d3.axisLeft(yScale)
         .tickFormat(d => `£${(d as number / 1000).toFixed(0)}k`)
-        .ticks(6)
+        .ticks(8)
       )
       .selectAll('text')
       .style('fill', '#9CA3AF')
@@ -93,7 +121,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 
     // Add grid lines
     g.selectAll('.grid-line-x')
-      .data(xScale.ticks(6))
+      .data(xScale.ticks(8))
       .enter()
       .append('line')
       .attr('class', 'grid-line-x')
@@ -103,10 +131,10 @@ export const LineChart: React.FC<LineChartProps> = ({
       .attr('y2', innerHeight)
       .style('stroke', '#374151')
       .style('stroke-width', 0.5)
-      .style('opacity', 0.5);
+      .style('opacity', 0.3);
 
     g.selectAll('.grid-line-y')
-      .data(yScale.ticks(6))
+      .data(yScale.ticks(8))
       .enter()
       .append('line')
       .attr('class', 'grid-line-y')
@@ -116,26 +144,66 @@ export const LineChart: React.FC<LineChartProps> = ({
       .attr('y2', d => yScale(d))
       .style('stroke', '#374151')
       .style('stroke-width', 0.5)
-      .style('opacity', 0.5);
+      .style('opacity', 0.3);
 
-    // Draw lines
+    // Draw lines for each series
     data.forEach((series) => {
-      g.append('path')
-        .datum(series.data)
-        .attr('fill', 'none')
-        .attr('stroke', series.color)
-        .attr('stroke-width', 2)
-        .attr('d', line)
-        .style('opacity', 0)
-        .transition()
-        .duration(800)
-        .style('opacity', 1);
+      // Split data into historical and projected segments
+      const historicalData = series.data.filter(d => !d.isProjected);
+      const projectedData = series.data.filter(d => d.isProjected);
+      
+      // Add the last historical point to projected data for continuity
+      if (historicalData.length > 0 && projectedData.length > 0) {
+        projectedData.unshift(historicalData[historicalData.length - 1]);
+      }
 
+      // Draw historical line (solid)
+      if (historicalData.length > 1) {
+        g.append('path')
+          .datum(historicalData)
+          .attr('fill', 'none')
+          .attr('stroke', series.color)
+          .attr('stroke-width', 3)
+          .attr('d', line)
+          .style('opacity', 0)
+          .transition()
+          .duration(800)
+          .style('opacity', 1);
+      }
+
+      // Draw projected line (dashed)
+      if (projectedData.length > 1) {
+        g.append('path')
+          .datum(projectedData)
+          .attr('fill', 'none')
+          .attr('stroke', series.color)
+          .attr('stroke-width', 3)
+          .attr('stroke-dasharray', '8,5')
+          .attr('d', line)
+          .style('opacity', 0)
+          .transition()
+          .delay(400)
+          .duration(800)
+          .style('opacity', 0.8);
+      }
+
+      // Add dots for data points
+      g.selectAll(`.dot-${series.name.replace(/\s+/g, '-')}`)
+        .data(series.data.filter((_, i) => i % Math.max(1, Math.floor(series.data.length / 20)) === 0))
+        .enter()
+        .append('circle')
+        .attr('class', `dot-${series.name.replace(/\s+/g, '-')}`)
+        .attr('cx', d => xScale(d.date))
+        .attr('cy', d => yScale(d.value))
+        .attr('r', 3)
+        .attr('fill', series.color)
+        .style('opacity', d => d.isProjected ? 0.6 : 0.9)
+        .style('stroke', '#1F2937')
+        .style('stroke-width', 1);
     });
 
     // Add invisible overlay for mouse events
-    g
-      .append('rect')
+    g.append('rect')
       .attr('width', innerWidth)
       .attr('height', innerHeight)
       .attr('fill', 'none')
@@ -144,28 +212,40 @@ export const LineChart: React.FC<LineChartProps> = ({
         const [mouseX] = d3.pointer(event);
         const dateAtMouse = xScale.invert(mouseX);
         
-        // Find closest data point
-        const bisect = d3.bisector((d: LineChartDataPoint) => d.date).left;
-        const closestIndex = bisect(data[0].data, dateAtMouse, 1);
-        const d0 = data[0].data[closestIndex - 1];
-        const d1 = data[0].data[closestIndex];
-        
-        if (!d0 || !d1) return;
-        
-        const closestPoint = dateAtMouse.getTime() - d0.date.getTime() > d1.date.getTime() - dateAtMouse.getTime() ? d1 : d0;
-        
+        // Find closest data point across all series
+        let closestPoint: ProjectionDataPoint | null = null;
+        let minDistance = Infinity;
+
+        data.forEach(series => {
+          series.data.forEach((point: ProjectionDataPoint) => {
+            const distance = Math.abs(point.date.getTime() - dateAtMouse.getTime());
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestPoint = point;
+            }
+          });
+        });
+
+        if (!closestPoint) return;
+
         // Get values for all series at this date
+        const closestPointDate = (closestPoint as ProjectionDataPoint).date;
         const tooltipValues = data.map(series => {
-          const point = series.data.find(p => p.date.getTime() === closestPoint.date.getTime());
+          const point = series.data.find(p => 
+            Math.abs(p.date.getTime() - closestPointDate.getTime()) < 24 * 60 * 60 * 1000 * 15 // Within 15 days
+          );
           return {
             name: series.name,
             value: point?.value || 0,
             color: series.color,
+            isProjected: point?.isProjected || false,
           };
-        });
+        }).filter(v => v.value > 0);
+
+        if (tooltipValues.length === 0) return;
 
         setTooltip({
-          date: closestPoint.date,
+          date: closestPointDate,
           values: tooltipValues,
         });
         
@@ -178,27 +258,14 @@ export const LineChart: React.FC<LineChartProps> = ({
         setTooltip(null);
       });
 
-    // Cleanup function to prevent memory leaks
     return () => {
       if (svgElement) {
         const svg = d3.select(svgElement);
-        
-        // Stop any running transitions
         svg.selectAll('*').interrupt();
-        
-        // Remove all event listeners from overlay and other elements
-        svg.selectAll('rect')
-          .on('mousemove', null)
-          .on('mouseleave', null);
-          
-        // Clear all transitions and remove elements
+        svg.selectAll('rect').on('mousemove', null).on('mouseleave', null);
         svg.selectAll('*').remove();
-        
-        // Clear the SVG itself of any remaining event listeners
         svg.on('mousemove', null).on('mouseleave', null);
       }
-      
-      // Reset state
       setTooltip(null);
       setMousePosition({ x: 0, y: 0 });
     };
@@ -230,14 +297,24 @@ export const LineChart: React.FC<LineChartProps> = ({
       />
       
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-4 justify-center">
+      <div className="mt-4 flex flex-wrap gap-6 justify-center">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-0.5 bg-gray-400" />
+          <span className="text-gray-300 text-sm">Historical Data</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-0.5 bg-gray-400 opacity-80" style={{borderTop: '2px dashed'}} />
+          <span className="text-gray-300 text-sm">Projected Data</span>
+        </div>
         {data.map((series) => (
           <div key={series.name} className="flex items-center gap-2">
             <div
               className="w-3 h-0.5"
               style={{ backgroundColor: series.color }}
             />
-            <span className="text-gray-300 text-sm">{series.name}</span>
+            <span className="text-gray-300 text-sm">
+              {series.name} ({(series.growthRate * 100).toFixed(1)}% annual)
+            </span>
           </div>
         ))}
       </div>
@@ -245,7 +322,7 @@ export const LineChart: React.FC<LineChartProps> = ({
       {/* Tooltip */}
       {tooltip && (
         <div
-          className="fixed z-50 bg-gray-800 text-white p-3 rounded-lg shadow-lg border border-gray-600 pointer-events-none min-w-48"
+          className="fixed z-50 bg-gray-800 text-white p-3 rounded-lg shadow-lg border border-gray-600 pointer-events-none min-w-56"
           style={{
             left: mousePosition.x + 10,
             top: mousePosition.y - 10,
@@ -263,7 +340,12 @@ export const LineChart: React.FC<LineChartProps> = ({
                     className="w-2 h-2 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-sm">{item.name}</span>
+                  <span className="text-sm">
+                    {item.name}
+                    {item.isProjected && (
+                      <span className="text-yellow-400 ml-1 text-xs">(proj.)</span>
+                    )}
+                  </span>
                 </div>
                 <span className="text-sm font-medium">
                   {formatCurrency(item.value)}

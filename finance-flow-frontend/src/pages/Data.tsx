@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { getFinancesData, saveFinancesData } from '@/services/api';
 import type { FinancesData, FinanceCategoryInfo, FinanceHistoryPoint } from '@/types/finances';

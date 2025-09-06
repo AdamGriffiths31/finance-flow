@@ -96,7 +96,7 @@ export const StackedAreaChart: React.FC<StackedAreaChartProps> = ({
     g.append('g')
       .attr('transform', `translate(0, ${innerHeight})`)
       .call(d3.axisBottom(xScale)
-        .tickFormat(d3.timeFormat('%b %y'))
+        .tickFormat((d) => d3.timeFormat('%b %y')(d as Date))
         .ticks(6)
       )
       .selectAll('text')
@@ -169,7 +169,7 @@ export const StackedAreaChart: React.FC<StackedAreaChartProps> = ({
         // Get values for all series at this date
         const tooltipValues = data.map(series => ({
           name: series.name,
-          value: closestPoint[series.name] || 0,
+          value: (typeof closestPoint[series.name] === 'number' ? closestPoint[series.name] : 0) as number,
           color: series.color,
         }));
 
