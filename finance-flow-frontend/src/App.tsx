@@ -22,7 +22,7 @@ function App() {
     <ErrorBoundary>
       <Router>
         <Layout>
-          <div className="min-h-screen bg-gray-900">
+          <div className="min-h-screen bg-gray-900 overflow-x-hidden">
             <ErrorBoundary 
               fallback={
                 <div className="bg-red-900 p-4 text-center">

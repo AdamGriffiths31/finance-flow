@@ -148,14 +148,20 @@ export const PieChart: React.FC<PieChartProps> = ({
       />
       
       {/* Legend */}
-      <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+      <div className="mt-4 flex flex-col items-center space-y-2 text-sm">
         {data.map((item) => (
-          <div key={item.category} className="flex items-center gap-2">
+          <div key={item.category} className="flex items-center gap-3">
             <div
-              className="w-3 h-3 rounded-sm flex-shrink-0"
-              style={{ backgroundColor: item.color }}
+              className="flex-shrink-0"
+              style={{ 
+                backgroundColor: item.color,
+                width: '16px',
+                height: '16px',
+                borderRadius: '2px',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}
             />
-            <span className="text-gray-300 truncate">{item.category}</span>
+            <span className="text-gray-300">{item.category}</span>
           </div>
         ))}
       </div>

@@ -49,14 +49,36 @@ export const resetSankeyData = async (): Promise<{ data: SankeyData }> => {
   return response.data;
 };
 
+// Date filter types
+export type DateFilterPeriod = '3months' | '1year' | 'all';
+
+export interface DateFilter {
+  from?: string;
+  to?: string;
+  period?: DateFilterPeriod;
+}
+
+// Helper function to build filtered URLs
+const buildFilteredUrl = (endpoint: string, filter?: DateFilter): string => {
+  const params = new URLSearchParams();
+  if (filter?.from) params.append('from', filter.from);
+  if (filter?.to) params.append('to', filter.to);
+  if (filter?.period) params.append('period', filter.period);
+  
+  const queryString = params.toString();
+  return `${endpoint}${queryString ? `?${queryString}` : ''}`;
+};
+
 // Finances data
-export const getFinancesBreakdown = async (): Promise<FinancesBreakdownData> => {
-  const response = await api.get('/finances/breakdown');
+export const getFinancesBreakdown = async (filter?: DateFilter): Promise<FinancesBreakdownData> => {
+  const url = buildFilteredUrl('/finances/breakdown', filter);
+  const response = await api.get(url);
   return response.data;
 };
 
-export const getFinancesHistory = async (): Promise<FinancesHistoryData> => {
-  const response = await api.get('/finances/history');
+export const getFinancesHistory = async (filter?: DateFilter): Promise<FinancesHistoryData> => {
+  const url = buildFilteredUrl('/finances/history', filter);
+  const response = await api.get(url);
   return response.data;
 };
 

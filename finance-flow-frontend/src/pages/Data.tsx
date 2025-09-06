@@ -33,7 +33,12 @@ export const Data = () => {
 
     try {
       setSaving(true);
-      const result = await saveFinancesData(data);
+      // Sort history by date before saving
+      const sortedData = {
+        ...data,
+        history: [...data.history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      };
+      const result = await saveFinancesData(sortedData);
       setData(result);
       toast.success('Data saved successfully!');
     } catch (err) {
@@ -214,30 +219,30 @@ export const Data = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-white">
+    <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">
           Data Management
         </h1>
         <div className="flex gap-4">
           <button
             onClick={saveData}
             disabled={saving}
-            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-700 text-green-100 rounded-lg hover:bg-green-600 transition-colors border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Categories Section */}
         <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">Categories</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Categories</h2>
             <button
               onClick={addCategory}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="w-full sm:w-auto px-4 py-2 bg-blue-700 text-blue-100 rounded hover:bg-blue-600 transition-colors border border-blue-600 text-sm sm:text-base"
             >
               Add Category
             </button>
@@ -245,22 +250,24 @@ export const Data = () => {
           
           <div className="space-y-3">
             {categoryInputs.map(({ category, index }) => (
-              <div key={category.name || `new-category-${index}`} className="flex items-center gap-3 p-3 bg-gray-700 rounded">
-                <input
-                  type="color"
-                  value={category.color}
-                  onChange={(e) => updateCategory(index, { ...category, color: e.target.value })}
-                  className="w-8 h-8 rounded border-0 cursor-pointer"
-                />
-                <input
-                  type="text"
-                  value={category.name}
-                  onChange={(e) => updateCategory(index, { ...category, name: e.target.value })}
-                  className="flex-1 px-3 py-2 bg-gray-600 text-white rounded border-0 focus:ring-2 focus:ring-blue-500"
-                />
+              <div key={category.name || `new-category-${index}`} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 bg-gray-700 rounded">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <input
+                    type="color"
+                    value={category.color}
+                    onChange={(e) => updateCategory(index, { ...category, color: e.target.value })}
+                    className="w-8 h-8 rounded border-0 cursor-pointer flex-shrink-0"
+                  />
+                  <input
+                    type="text"
+                    value={category.name}
+                    onChange={(e) => updateCategory(index, { ...category, name: e.target.value })}
+                    className="flex-1 min-w-0 px-3 py-2 bg-gray-600 text-white rounded border-0 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                  />
+                </div>
                 <button
                   onClick={() => removeCategory(index)}
-                  className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  className="px-3 py-2 bg-red-700 text-red-100 rounded hover:bg-red-600 transition-colors border border-red-600 text-sm sm:text-base whitespace-nowrap flex-shrink-0"
                 >
                   Remove
                 </button>
@@ -271,11 +278,11 @@ export const Data = () => {
 
         {/* Historical Data Section */}
         <div className="bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">Historical Data</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Historical Data</h2>
             <button
               onClick={addHistoryRecord}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="w-full sm:w-auto px-4 py-2 bg-blue-700 text-blue-100 rounded hover:bg-blue-600 transition-colors border border-blue-600 text-sm sm:text-base"
             >
               Add Record
             </button>
@@ -284,16 +291,16 @@ export const Data = () => {
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {data.history.map((record, recordIndex) => (
               <div key={recordIndex} className="p-4 bg-gray-700 rounded">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
                   <input
                     type="date"
                     value={record.date}
                     onChange={(e) => updateHistoryRecord(recordIndex, { ...record, date: e.target.value })}
-                    className="px-3 py-2 bg-gray-600 text-white rounded border-0 focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 bg-gray-600 text-white rounded border-0 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                   />
                   <button
                     onClick={() => removeHistoryRecord(recordIndex)}
-                    className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                    className="px-3 py-2 bg-red-700 text-red-100 rounded hover:bg-red-600 transition-colors border border-red-600 text-sm sm:text-base whitespace-nowrap"
                   >
                     Remove
                   </button>
@@ -314,7 +321,7 @@ export const Data = () => {
                           newData[category.name] = parseInt(e.target.value) || 0;
                           updateHistoryRecord(recordIndex, { ...record, data: newData });
                         }}
-                        className="flex-1 px-2 py-1 bg-gray-600 text-white rounded border-0 focus:ring-1 focus:ring-blue-500 text-sm"
+                        className="flex-1 px-2 py-1 bg-gray-600 text-white rounded border-0 focus:ring-1 focus:ring-blue-500 text-sm min-w-0"
                         min="0"
                         step="100"
                       />

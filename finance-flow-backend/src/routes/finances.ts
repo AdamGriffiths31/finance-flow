@@ -44,6 +44,16 @@ const HistoryRecordSchema = z.object({
   data: z.record(z.string().min(1), z.number().min(0)),
 });
 
+const DateFilterSchema = z.object({
+  from: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'From date must be in YYYY-MM-DD format')
+    .optional(),
+  to: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'To date must be in YYYY-MM-DD format')
+    .optional(),
+  period: z.enum(['3months', '1year', 'all']).optional(),
+});
+
 const FinancesDataSchema = z.object({
   categories: z.array(CategorySchema).min(1),
   history: z.array(HistoryRecordSchema).min(1),
@@ -51,6 +61,7 @@ const FinancesDataSchema = z.object({
 });
 
 type FinancesData = z.infer<typeof FinancesDataSchema>;
+type FinanceHistoryPoint = z.infer<typeof HistoryRecordSchema>;
 
 // Ensure data directory exists
 const ensureDataDirectory = async (): Promise<void> => {
@@ -139,17 +150,64 @@ const writeFinancesData = async (data: FinancesData): Promise<void> => {
   }
 };
 
-router.get('/breakdown', async (_req: Request, res: Response): Promise<void> => {
+// Helper function to filter history data based on date parameters
+const filterHistoryData = (history: FinanceHistoryPoint[], filters: { from?: string; to?: string; period?: '3months' | '1year' | 'all' }) => {
+  if (!filters.from && !filters.to && !filters.period) {
+    return history;
+  }
+
+  let fromDate: Date | null = null;
+  let toDate: Date | null = null;
+
+  if (filters.period) {
+    const now = new Date();
+    toDate = now;
+    
+    switch (filters.period) {
+      case '3months':
+        fromDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+        break;
+      case '1year':
+        fromDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        break;
+      case 'all':
+        return history;
+    }
+  } else {
+    if (filters.from) {
+      fromDate = new Date(filters.from);
+    }
+    if (filters.to) {
+      toDate = new Date(filters.to);
+    }
+  }
+
+  return history.filter(record => {
+    const recordDate = new Date(record.date);
+    if (fromDate && recordDate < fromDate) return false;
+    if (toDate && recordDate > toDate) return false;
+    return true;
+  });
+};
+
+router.get('/breakdown', async (req: Request, res: Response): Promise<void> => {
   try {
     const data = await readFinancesData();
-    const latestRecord = data.history[data.history.length - 1];
     
-    if (!latestRecord) {
-      res.status(404).json({ error: 'No financial data available' });
+    // Validate query parameters
+    const filterParams = DateFilterSchema.parse(req.query);
+    
+    // Filter history data
+    const filteredHistory = filterHistoryData(data.history, filterParams);
+    
+    if (filteredHistory.length === 0) {
+      res.status(404).json({ error: 'No financial data available for the selected period' });
       return;
     }
     
-    // Create breakdown from latest record
+    const latestRecord = filteredHistory[filteredHistory.length - 1];
+    
+    // Create breakdown from latest record in filtered data
     const breakdown = data.categories.map((category) => ({
       category: category.name,
       value: latestRecord.data[category.name] || 0,
@@ -165,19 +223,44 @@ router.get('/breakdown', async (_req: Request, res: Response): Promise<void> => 
     });
   } catch (error) {
     logger.error('Error fetching breakdown data:', error);
+    
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ 
+        error: 'Invalid filter parameters', 
+        details: error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`)
+      });
+      return;
+    }
+    
     res.status(500).json({ error: 'Failed to fetch breakdown data' });
   }
 });
 
-router.get('/history', async (_req: Request, res: Response): Promise<void> => {
+router.get('/history', async (req: Request, res: Response): Promise<void> => {
   try {
     const data = await readFinancesData();
+    
+    // Validate query parameters
+    const filterParams = DateFilterSchema.parse(req.query);
+    
+    // Filter history data
+    const filteredHistory = filterHistoryData(data.history, filterParams);
+    
     res.json({
-      history: data.history,
+      history: filteredHistory,
       categories: data.categories,
     });
   } catch (error) {
     logger.error('Error fetching history data:', error);
+    
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ 
+        error: 'Invalid filter parameters', 
+        details: error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`)
+      });
+      return;
+    }
+    
     res.status(500).json({ error: 'Failed to fetch history data' });
   }
 });

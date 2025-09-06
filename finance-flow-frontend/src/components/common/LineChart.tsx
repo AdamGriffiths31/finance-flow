@@ -131,21 +131,6 @@ export const LineChart: React.FC<LineChartProps> = ({
         .duration(800)
         .style('opacity', 1);
 
-      // Add dots
-      g.selectAll(`.dot-${series.name.replace(/\s+/g, '-')}`)
-        .data(series.data)
-        .enter()
-        .append('circle')
-        .attr('class', `dot-${series.name.replace(/\s+/g, '-')}`)
-        .attr('cx', d => xScale(d.date))
-        .attr('cy', d => yScale(d.value))
-        .attr('r', 4)
-        .attr('fill', series.color)
-        .style('opacity', 0)
-        .transition()
-        .delay(200)
-        .duration(600)
-        .style('opacity', 1);
     });
 
     // Add invisible overlay for mouse events
