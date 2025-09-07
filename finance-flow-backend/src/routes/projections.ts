@@ -2,14 +2,18 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { handleError } from '../utils/errorHandler';
 import { FinancesDataService } from '../services/financesDataService';
-
-const router = Router();
-const dataService = FinancesDataService.getInstance();
+import { PROJECTIONS, TIME, ERROR_CODES } from '../constants';
 
 // Zod schemas for validation
 const ProjectionConfigSchema = z.object({
-  calculationPeriodMonths: z.coerce.number().min(3).max(24).default(12),
-  projectionPeriodMonths: z.coerce.number().min(3).max(60).default(12),
+  calculationPeriodMonths: z.coerce.number()
+    .min(PROJECTIONS.MIN_CALCULATION_PERIOD_MONTHS)
+    .max(PROJECTIONS.MAX_CALCULATION_PERIOD_MONTHS)
+    .default(PROJECTIONS.DEFAULT_CALCULATION_PERIOD_MONTHS),
+  projectionPeriodMonths: z.coerce.number()
+    .min(PROJECTIONS.MIN_PROJECTION_PERIOD_MONTHS)
+    .max(PROJECTIONS.MAX_PROJECTION_PERIOD_MONTHS)
+    .default(PROJECTIONS.DEFAULT_PROJECTION_PERIOD_MONTHS),
 });
 
 type ProjectionConfig = z.infer<typeof ProjectionConfigSchema>;
@@ -25,12 +29,12 @@ const calculateGrowthRate = (
   values: number[],
   dates: Date[]
 ): { monthlyRate: number; annualRate: number } => {
-  if (values.length < 2) {
+  if (values.length < PROJECTIONS.MIN_HISTORY_POINTS_FOR_PROJECTION) {
     return { monthlyRate: 0, annualRate: 0 };
   }
 
   // For better projections, use average of recent months rather than just start/end
-  if (values.length >= 6) {
+  if (values.length >= PROJECTIONS.MIN_HISTORY_POINTS_FOR_ADVANCED_CALCULATION) {
     // Use linear regression or moving average for more stable growth calculation
     const monthlyGrowths = [];
     
@@ -41,7 +45,7 @@ const calculateGrowthRate = (
       if (previousValue > 0) {
         const monthlyGrowth = (currentValue - previousValue) / previousValue;
         // Cap extreme growth rates to reduce impact of one-off deposits
-        const cappedGrowth = Math.max(-0.5, Math.min(0.5, monthlyGrowth)); // Cap at ±50% per month
+        const cappedGrowth = Math.max(PROJECTIONS.MIN_MONTHLY_GROWTH_RATE, Math.min(PROJECTIONS.MAX_MONTHLY_GROWTH_RATE, monthlyGrowth));
         monthlyGrowths.push(cappedGrowth);
       }
     }
@@ -54,7 +58,7 @@ const calculateGrowthRate = (
         ? (monthlyGrowths[medianIndex - 1] + monthlyGrowths[medianIndex]) / 2
         : monthlyGrowths[medianIndex];
       
-      const annualRate = monthlyRate * 12;
+      const annualRate = monthlyRate * TIME.MONTHS_PER_YEAR;
       
       return { monthlyRate, annualRate };
     }
@@ -66,7 +70,7 @@ const calculateGrowthRate = (
   const startDate = dates[0];
   const endDate = dates[dates.length - 1];
   
-  const monthsDiff = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+  const monthsDiff = (endDate.getTime() - startDate.getTime()) / TIME.MILLISECONDS_PER_MONTH;
   
   if (monthsDiff <= 0 || startValue <= 0) {
     return { monthlyRate: 0, annualRate: 0 };
@@ -74,8 +78,8 @@ const calculateGrowthRate = (
 
   // Linear growth rate with cap
   const rawMonthlyRate = (endValue - startValue) / (startValue * monthsDiff);
-  const monthlyRate = Math.max(-0.1, Math.min(0.1, rawMonthlyRate)); // Cap at ±10% per month
-  const annualRate = monthlyRate * 12;
+  const monthlyRate = Math.max(PROJECTIONS.MIN_FALLBACK_MONTHLY_RATE, Math.min(PROJECTIONS.MAX_FALLBACK_MONTHLY_RATE, rawMonthlyRate));
+  const annualRate = monthlyRate * TIME.MONTHS_PER_YEAR;
 
   return {
     monthlyRate,
@@ -109,16 +113,19 @@ const generateProjections = (
   return projections;
 };
 
-// Main projections endpoint
-router.get('/data', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const configParams: ProjectionConfig = ProjectionConfigSchema.parse(req.query);
-    
-    const financesData = await dataService.readFinancesData();
+export default (financesService: FinancesDataService) => {
+  const router = Router();
+
+  // Main projections endpoint
+  router.get('/data', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const configParams: ProjectionConfig = ProjectionConfigSchema.parse(req.query);
+      
+      const financesData = await financesService.readFinancesData();
     const { categories, history } = financesData;
     
     if (!history || history.length === 0) {
-      res.status(404).json({ error: 'No historical data available', code: 'NO_DATA' });
+      res.status(404).json({ error: 'No historical data available', code: ERROR_CODES.NO_DATA });
       return;
     }
 
@@ -130,8 +137,8 @@ router.get('/data', async (req: Request, res: Response): Promise<void> => {
       .filter((record: HistoryRecord) => new Date(record.date) >= calculationStartDate)
       .sort((a: HistoryRecord, b: HistoryRecord) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
-    if (filteredHistory.length < 2) {
-      res.status(400).json({ error: 'Insufficient historical data', code: 'INSUFFICIENT_DATA' });
+    if (filteredHistory.length < PROJECTIONS.MIN_HISTORY_POINTS_FOR_PROJECTION) {
+      res.status(400).json({ error: 'Insufficient historical data', code: ERROR_CODES.INSUFFICIENT_DATA });
       return;
     }
 
@@ -188,8 +195,9 @@ router.get('/data', async (req: Request, res: Response): Promise<void> => {
 
     res.json(response);
   } catch (error) {
-    handleError(error, res, 'generateProjections');
+    handleError(error, res, 'generateProjections', req.id);
   }
 });
 
-export default router;
+  return router;
+};

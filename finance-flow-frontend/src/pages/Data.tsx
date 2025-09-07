@@ -208,7 +208,7 @@ export const Data = () => {
             <p>{error || 'Failed to load data'}</p>
             <button
               onClick={fetchData}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="mt-4 px-4 py-2 bg-slate-600 text-slate-100 rounded-lg hover:bg-slate-500 transition-colors border border-slate-500"
             >
               Retry
             </button>
@@ -228,7 +228,7 @@ export const Data = () => {
           <button
             onClick={saveData}
             disabled={saving}
-            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-700 text-green-100 rounded-lg hover:bg-green-600 transition-colors border border-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-green-600/20 text-green-200 rounded-lg hover:bg-green-600/30 transition-colors border border-green-500/30 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base font-medium"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
@@ -242,7 +242,7 @@ export const Data = () => {
             <h2 className="text-lg sm:text-xl font-semibold text-white">Categories</h2>
             <button
               onClick={addCategory}
-              className="w-full sm:w-auto px-4 py-2 bg-blue-700 text-blue-100 rounded hover:bg-blue-600 transition-colors border border-blue-600 text-sm sm:text-base"
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600/20 text-blue-200 rounded-lg hover:bg-blue-600/30 transition-colors border border-blue-500/30 text-sm sm:text-base"
             >
               Add Category
             </button>
@@ -267,7 +267,7 @@ export const Data = () => {
                 </div>
                 <button
                   onClick={() => removeCategory(index)}
-                  className="px-3 py-2 bg-red-700 text-red-100 rounded hover:bg-red-600 transition-colors border border-red-600 text-sm sm:text-base whitespace-nowrap flex-shrink-0"
+                  className="px-3 py-2 bg-red-600/20 text-red-200 rounded-lg hover:bg-red-600/30 transition-colors border border-red-500/30 text-sm sm:text-base whitespace-nowrap flex-shrink-0"
                 >
                   Remove
                 </button>
@@ -282,7 +282,7 @@ export const Data = () => {
             <h2 className="text-lg sm:text-xl font-semibold text-white">Historical Data</h2>
             <button
               onClick={addHistoryRecord}
-              className="w-full sm:w-auto px-4 py-2 bg-blue-700 text-blue-100 rounded hover:bg-blue-600 transition-colors border border-blue-600 text-sm sm:text-base"
+              className="w-full sm:w-auto px-4 py-2 bg-blue-600/20 text-blue-200 rounded-lg hover:bg-blue-600/30 transition-colors border border-blue-500/30 text-sm sm:text-base"
             >
               Add Record
             </button>
@@ -300,7 +300,7 @@ export const Data = () => {
                   />
                   <button
                     onClick={() => removeHistoryRecord(recordIndex)}
-                    className="px-3 py-2 bg-red-700 text-red-100 rounded hover:bg-red-600 transition-colors border border-red-600 text-sm sm:text-base whitespace-nowrap"
+                    className="px-3 py-2 bg-red-600/20 text-red-200 rounded-lg hover:bg-red-600/30 transition-colors border border-red-500/30 text-sm sm:text-base whitespace-nowrap"
                   >
                     Remove
                   </button>

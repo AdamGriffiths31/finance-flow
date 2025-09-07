@@ -5,7 +5,6 @@ import { Layout } from '@/components/layout/Layout';
 import { Navigation } from '@/components/layout/Navigation';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { Dashboard } from '@/pages/Dashboard';
-import { FinanceFlow } from '@/pages/FinanceFlow';
 import { Projections } from '@/pages/Projections';
 import { Data } from '@/pages/Data';
 import { checkHealth } from '@/services/api';
@@ -53,7 +52,6 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/sankey" element={<FinanceFlow />} />
                 <Route path="/projections" element={<Projections />} />
                 <Route path="/data" element={<Data />} />
               </Routes>

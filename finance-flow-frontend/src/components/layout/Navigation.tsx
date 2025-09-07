@@ -7,7 +7,6 @@ export const Navigation = () => {
 
   const navItems = [
     { path: '/', label: 'Dashboard' },
-    { path: '/sankey', label: 'Sankey' },
     { path: '/projections', label: 'Projections' },
     { path: '/data', label: 'Data' },
   ];

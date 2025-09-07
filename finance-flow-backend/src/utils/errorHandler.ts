@@ -3,7 +3,17 @@ import { z } from 'zod';
 import { logger } from './logger';
 
 
+/**
+ * Custom error class for API errors with status codes and additional context
+ */
 export class ApiError extends Error {
+  /**
+   * Create a new API error
+   * @param message - Error message
+   * @param statusCode - HTTP status code (default: 500)
+   * @param code - Error code identifier
+   * @param details - Additional error details
+   */
   constructor(
     message: string,
     public statusCode: number = 500,
@@ -15,6 +25,13 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Central error handler for Express routes
+ * @param error - The error that occurred
+ * @param res - Express response object
+ * @param context - Context where the error occurred
+ * @param requestId - Optional request ID for tracing
+ */
 export const handleError = (
   error: unknown,
   res: Response,

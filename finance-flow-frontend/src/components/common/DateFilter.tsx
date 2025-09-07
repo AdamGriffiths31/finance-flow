@@ -27,7 +27,7 @@ export const DateFilterComponent: React.FC<DateFilterProps> = ({
             onClick={() => onFilterChange(option.value)}
             className={`px-3 py-1 text-sm rounded transition-colors ${
               selectedFilter.period === option.value.period
-                ? 'bg-blue-600 text-white'
+                ? 'bg-blue-600/20 text-blue-200 border border-blue-500/30'
                 : 'text-gray-300 hover:text-white hover:bg-gray-600'
             }`}
           >
